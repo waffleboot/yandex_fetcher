@@ -3,7 +3,6 @@ package http
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -19,7 +18,6 @@ func NewHttpClient() HTTPClient {
 
 func (h HTTPClient) Supply(search string) ([]byte, error) {
 	url := fmt.Sprintf(baseYandexURL, url.QueryEscape(search))
-	log.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

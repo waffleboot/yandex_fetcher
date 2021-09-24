@@ -11,6 +11,9 @@ import (
 
 	"github.com/go-chi/chi"
 
+	worker_application "github.com/waffleboot/playstation_buy/pkg/worker/application"
+	worker_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/ipc"
+
 	yandex_application "github.com/waffleboot/playstation_buy/pkg/yandex/application"
 	yandex_infra_yandex "github.com/waffleboot/playstation_buy/pkg/yandex/infra/yandex"
 	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
@@ -33,14 +36,20 @@ func startServer() error {
 
 	r := chi.NewRouter()
 
+	ctx := context.Background()
+
 	yandex :=
 		yandex_interfaces_private_ipc.NewEndpoint(
 			yandex_application.NewService(
 				yandex_infra_yandex.NewHttpClient()))
 
+	n := 1
+
+	worker := worker_interfaces_private_ipc.NewEndpoint(worker_application.NewService(ctx, n))
+
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
-			root_infra_yandex.NewYandexSupplier(yandex)))
+			root_infra_yandex.NewYandexSupplier(yandex), worker))
 
 	service.AddRoutes(r)
 

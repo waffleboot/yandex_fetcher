@@ -1,15 +1,24 @@
 package application
 
-import "github.com/waffleboot/playstation_buy/pkg/common/domain"
+import (
+	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+)
 
 type supplier interface {
 	Supply(search string) ([]domain.YandexItem, error)
 }
 
-type Service struct {
-	supplier supplier
+type benchmark interface {
+	Benchmark(url string) (int, error)
 }
 
-func NewService(supplier supplier) Service {
-	return Service{supplier: supplier}
+type Service struct {
+	benchmark benchmark
+	supplier  supplier
+}
+
+func NewService(supplier supplier, benchmark benchmark) Service {
+	return Service{
+		benchmark: benchmark,
+		supplier:  supplier}
 }
