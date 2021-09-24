@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -10,9 +9,7 @@ import (
 )
 
 type Service struct {
-	timeout time.Duration
 	clients []http.Client
-	ctx     context.Context
 }
 
 func NewService(ctx context.Context, n int, timeout time.Duration) *Service {
@@ -20,12 +17,10 @@ func NewService(ctx context.Context, n int, timeout time.Duration) *Service {
 	for i := 0; i < n; i++ {
 		clients[i].Timeout = timeout
 	}
-	return &Service{clients: clients, ctx: ctx, timeout: timeout}
+	return &Service{clients: clients}
 }
 
-func (s *Service) Benchmark(url string) (int, error) {
-	ctx, cancel := context.WithTimeout(s.ctx, s.timeout)
-	defer cancel()
+func (s *Service) Benchmark(ctx context.Context, url string) (int, error) {
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -50,7 +45,6 @@ func (s *Service) Benchmark(url string) (int, error) {
 			} else {
 				defer resp.Body.Close()
 			}
-			log.Println(url)
 		}()
 	}
 
@@ -59,5 +53,5 @@ func (s *Service) Benchmark(url string) (int, error) {
 	}
 
 	wg.Wait()
-	return int(counter), nil
+	return len(s.clients) - int(counter), nil
 }
