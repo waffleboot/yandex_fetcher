@@ -10,8 +10,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-const baseYandexURL = "https://yandex.ru/search/touch/?service=www.yandex&ui=webmobileapp.yandex&numdoc=50&lr=213&p=0&text=%s"
-
 type responseStruct struct {
 	Error error
 	Items []responseItem

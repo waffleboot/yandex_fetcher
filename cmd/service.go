@@ -11,7 +11,13 @@ import (
 
 	"github.com/go-chi/chi"
 
-	public_http "github.com/waffleboot/playstation_buy/pkg/interfaces/public/http"
+	yandex_application "github.com/waffleboot/playstation_buy/pkg/yandex/application"
+	yandex_infra_yandex "github.com/waffleboot/playstation_buy/pkg/yandex/infra/yandex"
+	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
+
+	root_application "github.com/waffleboot/playstation_buy/pkg/root/application"
+	root_infra_yandex "github.com/waffleboot/playstation_buy/pkg/root/infra/yandex"
+	root_interfaces_public_http "github.com/waffleboot/playstation_buy/pkg/root/interfaces/public/http"
 )
 
 func run(args []string) int {
@@ -24,8 +30,20 @@ func run(args []string) int {
 }
 
 func startServer() error {
+
 	r := chi.NewRouter()
-	public_http.AddRoutes(r)
+
+	yandex :=
+		yandex_interfaces_private_ipc.NewEndpoint(
+			yandex_application.NewService(
+				yandex_infra_yandex.NewHttpClient()))
+
+	service := root_interfaces_public_http.NewEndpoint(
+		root_application.NewService(
+			root_infra_yandex.NewYandexSupplier(yandex)))
+
+	service.AddRoutes(r)
+
 	server := &http.Server{Addr: ":9000", Handler: r}
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
