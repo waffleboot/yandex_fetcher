@@ -6,13 +6,13 @@ import (
 )
 
 type Endpoint struct {
-	service app.Service
+	service *app.Service
 }
 
-func NewEndpoint(s app.Service) Endpoint {
-	return Endpoint{service: s}
+func NewEndpoint(s *app.Service) *Endpoint {
+	return &Endpoint{service: s}
 }
 
-func (e Endpoint) AddRoutes(router *chi.Mux) {
+func (e *Endpoint) AddRoutes(router *chi.Mux) {
 	router.Get("/sites", e.sites)
 }

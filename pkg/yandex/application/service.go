@@ -10,11 +10,11 @@ type Service struct {
 	supplier
 }
 
-func NewService(supplier supplier) Service {
-	return Service{supplier: supplier}
+func NewService(supplier supplier) *Service {
+	return &Service{supplier: supplier}
 }
 
-func (s Service) ParseYandex(search string) ([]domain.YandexItem, error) {
+func (s *Service) ParseYandex(search string) ([]domain.YandexItem, error) {
 	data, err := s.supplier.Supply(search)
 	if err != nil {
 		return nil, err

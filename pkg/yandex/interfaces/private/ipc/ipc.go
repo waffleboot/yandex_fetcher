@@ -6,13 +6,13 @@ import (
 )
 
 type Endpoint struct {
-	service app.Service
+	service *app.Service
 }
 
-func NewEndpoint(s app.Service) Endpoint {
-	return Endpoint{service: s}
+func NewEndpoint(s *app.Service) *Endpoint {
+	return &Endpoint{service: s}
 }
 
-func (s Endpoint) GetYandexItems(search string) ([]domain.YandexItem, error) {
+func (s *Endpoint) GetYandexItems(search string) ([]domain.YandexItem, error) {
 	return s.service.ParseYandex(search)
 }

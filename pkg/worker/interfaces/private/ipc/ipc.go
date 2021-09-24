@@ -5,13 +5,13 @@ import (
 )
 
 type Endpoint struct {
-	service app.Service
+	service *app.Service
 }
 
-func NewEndpoint(service app.Service) Endpoint {
-	return Endpoint{service: service}
+func NewEndpoint(service *app.Service) *Endpoint {
+	return &Endpoint{service: service}
 }
 
-func (e Endpoint) Benchmark(url string) (int, error) {
+func (e *Endpoint) Benchmark(url string) (int, error) {
 	return e.service.Benchmark(url)
 }

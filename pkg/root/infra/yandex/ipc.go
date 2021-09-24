@@ -6,13 +6,13 @@ import (
 )
 
 type YandexSupplier struct {
-	ipc.Endpoint
+	endpoint *ipc.Endpoint
 }
 
-func NewYandexSupplier(endpoint ipc.Endpoint) YandexSupplier {
-	return YandexSupplier{Endpoint: endpoint}
+func NewYandexSupplier(endpoint *ipc.Endpoint) *YandexSupplier {
+	return &YandexSupplier{endpoint: endpoint}
 }
 
-func (y YandexSupplier) Supply(search string) ([]domain.YandexItem, error) {
-	return y.Endpoint.GetYandexItems(search)
+func (y *YandexSupplier) Supply(search string) ([]domain.YandexItem, error) {
+	return y.endpoint.GetYandexItems(search)
 }

@@ -17,8 +17,8 @@ type Service struct {
 	supplier  supplier
 }
 
-func NewService(supplier supplier, benchmark benchmark) Service {
-	return Service{
+func NewService(supplier supplier, benchmark benchmark) *Service {
+	return &Service{
 		benchmark: benchmark,
 		supplier:  supplier}
 }

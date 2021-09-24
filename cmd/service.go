@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-chi/chi"
 
@@ -45,11 +46,13 @@ func startServer() error {
 
 	n := 1
 
-	worker := worker_interfaces_private_ipc.NewEndpoint(worker_application.NewService(ctx, n))
+	worker := worker_interfaces_private_ipc.NewEndpoint(
+		worker_application.NewService(ctx, n, 3*time.Second))
 
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
-			root_infra_yandex.NewYandexSupplier(yandex), worker))
+			root_infra_yandex.NewYandexSupplier(yandex),
+			worker))
 
 	service.AddRoutes(r)
 
