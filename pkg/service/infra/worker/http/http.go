@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
@@ -23,21 +22,7 @@ func NewBenchmarkSupplier(checkerUrl string) *BenchmarkSupplier {
 	}
 }
 
-func (b *BenchmarkSupplier) Benchmark(ctx context.Context, items []domain.YandexItem) ([]domain.StatsItem, error) {
-	m := make([]domain.StatsItem, 0, len(items))
-	for _, item := range items {
-		ans, err := b.process(ctx, item)
-		if ctx.Err() == context.DeadlineExceeded {
-			return m, ctx.Err()
-		} else if err != nil {
-			return m, err
-		}
-		m = append(m, ans)
-	}
-	return m, nil
-}
-
-func (b *BenchmarkSupplier) process(ctx context.Context, item domain.YandexItem) (domain.StatsItem, error) {
+func (b *BenchmarkSupplier) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
 	req := http.Request{
 		Host: item.Host,
 		Url:  item.Url,
@@ -46,7 +31,7 @@ func (b *BenchmarkSupplier) process(ctx context.Context, item domain.YandexItem)
 	if err != nil {
 		return domain.StatsItem{}, err
 	}
-	httpRequest, err := http2.NewRequestWithContext(ctx, http2.MethodPost, b.checkerUrl, bytes.NewReader(body))
+	httpRequest, err := http2.NewRequest(http2.MethodPost, b.checkerUrl, bytes.NewReader(body))
 	if err != nil {
 		return domain.StatsItem{}, err
 	}

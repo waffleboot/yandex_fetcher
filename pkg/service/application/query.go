@@ -33,12 +33,25 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 		return m, nil
 	}
 
-	items, err := s.benchmark.Benchmark(ctx, p)
-	for _, v := range items {
-		s.cache.Put(v.Host, v.Count)
-		m[v.Host] = v.Count
+	channel := make(chan domain.StatsItem, len(p))
+	go func() {
+		for _, v := range p {
+			ans, err := s.benchmark.Benchmark(v)
+			if err != nil {
+				continue
+			}
+			s.cache.Put(ans.Host, ans.Count)
+			channel <- ans
+		}
+	}()
+	for {
+		select {
+		case v := <-channel:
+			m[v.Host] = v.Count
+		case <-ctx.Done():
+			return m, ctx.Err()
+		}
 	}
-	return m, err
 }
 
 func (s *Service) Update(host string, count int) {

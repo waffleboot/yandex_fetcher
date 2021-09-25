@@ -12,7 +12,7 @@ type yandex interface {
 }
 
 type benchmark interface {
-	Benchmark(context.Context, []domain.YandexItem) ([]domain.StatsItem, error)
+	Benchmark(domain.YandexItem) (domain.StatsItem, error)
 }
 
 type cache interface {
