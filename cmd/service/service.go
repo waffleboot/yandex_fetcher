@@ -22,7 +22,7 @@ import (
 	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
 
 	root_application "github.com/waffleboot/playstation_buy/pkg/root/application"
-	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/root/infra/worker"
+	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/root/infra/worker/ipc"
 	root_infra_yandex "github.com/waffleboot/playstation_buy/pkg/root/infra/yandex"
 	root_interfaces_public_http "github.com/waffleboot/playstation_buy/pkg/root/interfaces/public/http"
 )
@@ -54,14 +54,17 @@ func startServer() error {
 
 	siteFetchers := 1
 
-	worker := worker_interfaces_private_ipc.NewEndpoint(
-		worker_application.NewService(ctx, cache, siteFetchers, timeout))
+	worker_channel := make(chan worker_interfaces_private_ipc.ChannelItem, 1)
+
+	worker_interfaces_private_ipc.StartEndpoint(
+		worker_application.NewService(ctx, cache, siteFetchers, timeout),
+		worker_channel)
 
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
 			timeout,
 			root_infra_yandex.NewYandex(yandex),
-			root_infra_worker.NewBenchmarkSupplier(worker),
+			root_infra_worker.NewBenchmarkSupplier(worker_channel),
 			cache))
 
 	service.AddRoutes(r)
