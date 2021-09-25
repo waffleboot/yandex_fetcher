@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/waffleboot/playstation_buy/pkg/root/interfaces/public/http"
+	"github.com/waffleboot/playstation_buy/pkg/service/interfaces/public/http"
 
 	http2 "net/http"
 )
