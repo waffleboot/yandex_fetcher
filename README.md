@@ -13,7 +13,7 @@
 
 # Решение
 
-Два http сервиса, но можно сделать монолитом. По методологии Clean Architecture, по образцу [monolith-microservice-shop](https://github.com/waffleboot/monolith-microservice-shop)
+Два http сервиса, но можно сделать монолитом. По методологии Clean Architecture (domain-app-infra-inter), по образцу [monolith-microservice-shop](https://github.com/waffleboot/monolith-microservice-shop)
 
 ### service
 
