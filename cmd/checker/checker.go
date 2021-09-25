@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"go.uber.org/zap"
 
 	cache "github.com/waffleboot/playstation_buy/pkg/cache"
 
@@ -40,7 +41,9 @@ func startServer(checkerAddr, serviceUrl string) error {
 
 	r := chi.NewRouter()
 
-	cache := &cache.MemoryCache{}
+	log, _ := zap.NewProduction()
+
+	cache := cache.NewMemoryCache(log)
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
