@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/http"
+	"github.com/waffleboot/playstation_buy/pkg/checker/interfaces/private/http"
 
 	http2 "net/http"
 )

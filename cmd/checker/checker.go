@@ -13,10 +13,10 @@ import (
 
 	cache "github.com/waffleboot/playstation_buy/pkg/cache"
 
-	root_infra_service "github.com/waffleboot/playstation_buy/pkg/worker/infra/service/http"
+	root_infra_service "github.com/waffleboot/playstation_buy/pkg/checker/infra/service/http"
 
-	worker_application "github.com/waffleboot/playstation_buy/pkg/worker/application"
-	worker_interfaces_private_http "github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/http"
+	worker_application "github.com/waffleboot/playstation_buy/pkg/checker/application"
+	worker_interfaces_private_http "github.com/waffleboot/playstation_buy/pkg/checker/interfaces/private/http"
 )
 
 func run(args []string) int {

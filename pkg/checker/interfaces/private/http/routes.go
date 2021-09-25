@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	app "github.com/waffleboot/playstation_buy/pkg/worker/application"
+	app "github.com/waffleboot/playstation_buy/pkg/checker/application"
 )
 
 func (e *Endpoint) AddRoutes(router *chi.Mux) {
