@@ -16,6 +16,7 @@ services:
     image: checker
     command: /checker
     environment:
+      - "TIMEOUT=3"
       - "CHECKER_ADDR=:9000"
       - "CHECKERS_COUNT=25"
       - "SERVICE_URL=http://service:9000/update"

@@ -36,6 +36,7 @@ Service:
 
 Checker:
 
+* `TIMEOUT` - сколько ждать сайт
 * `CHECKER_ADDR` - на каком порту пускать
 * `CHECKER_FETCHERS` - сколько одновременных клиентов нагружать на страницы
 * `SERVICE_URL` - http callback

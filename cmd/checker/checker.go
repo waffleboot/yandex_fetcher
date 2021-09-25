@@ -42,12 +42,12 @@ func startServer(checkerAddr, serviceUrl string) error {
 
 	cache := &cache.MemoryCache{}
 
-	timeout := 3 * time.Second
+	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
 	service := root_infra_service.NewInitialService(serviceUrl)
 
 	worker := worker_interfaces_private_http.NewEndpoint(
-		worker_application.NewService(cache, service, checkersCount(10), timeout))
+		worker_application.NewService(cache, service, intConfig("CHECKERS_COUNT", 10), timeout))
 
 	worker.AddRoutes(r)
 
@@ -58,8 +58,8 @@ func startServer(checkerAddr, serviceUrl string) error {
 	return nil
 }
 
-func checkersCount(def int) int {
-	s := os.Getenv("CHECKERS_COUNT")
+func intConfig(name string, def int) int {
+	s := os.Getenv(name)
 	if s == "" {
 		return def
 	}
