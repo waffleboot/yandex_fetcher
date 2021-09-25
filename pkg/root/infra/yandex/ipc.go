@@ -4,17 +4,15 @@ import (
 	"context"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+
+	"github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
 )
 
-type Endpoint interface {
-	AddQuery(context.Context, string) (chan []domain.YandexItem, chan error)
-}
-
 type Yandex struct {
-	endpoint Endpoint
+	endpoint *ipc.Endpoint
 }
 
-func NewYandex(endpoint Endpoint) *Yandex {
+func NewYandex(endpoint *ipc.Endpoint) *Yandex {
 	return &Yandex{endpoint: endpoint}
 }
 

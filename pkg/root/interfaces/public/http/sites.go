@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -20,6 +21,7 @@ func NewEndpoint(s *app.Service) *Endpoint {
 
 func (e *Endpoint) sites(w http.ResponseWriter, r *http.Request) {
 	search := r.URL.Query().Get("search")
+	log.Printf("sites/%s", search)
 	m, err := e.service.ProcessQuery(search)
 	if errors.Is(err, context.DeadlineExceeded) {
 		w.WriteHeader(http.StatusRequestTimeout)

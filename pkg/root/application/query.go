@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
@@ -30,6 +31,7 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 		return m, nil
 	}
 
+	log.Printf("%d not found", len(p))
 	datc, errc := s.benchmark.Benchmark(ctx, p)
 	for {
 		select {

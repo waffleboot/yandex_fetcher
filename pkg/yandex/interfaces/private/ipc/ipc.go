@@ -36,11 +36,14 @@ func NewEndpoint(s *app.Service) *Endpoint {
 func (e *Endpoint) AddQuery(ctx context.Context, search string) (chan []domain.YandexItem, chan error) {
 	datc := make(chan []domain.YandexItem, 1)
 	errc := make(chan error, 1)
-	e.channel <- channelItem{
+	select {
+	case e.channel <- channelItem{
 		ctx:    ctx,
 		done:   datc,
 		errc:   errc,
-		search: search,
+		search: search}:
+	case <-ctx.Done():
+		break
 	}
 	return datc, errc
 }

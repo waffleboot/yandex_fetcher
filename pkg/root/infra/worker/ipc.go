@@ -3,6 +3,7 @@ package ipc
 import (
 	"context"
 
+	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 	"github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/ipc"
 )
 
@@ -16,6 +17,6 @@ func NewBenchmarkSupplier(endpoint *ipc.Endpoint) *BenchmarkSupplier {
 	}
 }
 
-func (b *BenchmarkSupplier) Benchmark(ctx context.Context, url string) (int, error) {
-	return b.endpoint.Benchmark(ctx, url)
+func (b *BenchmarkSupplier) Benchmark(ctx context.Context, items []domain.YandexItem) (chan domain.StatsItem, chan error) {
+	return b.endpoint.Benchmark(ctx, items)
 }
