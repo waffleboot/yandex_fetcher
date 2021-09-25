@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"crypto/tls"
-	"log"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -66,7 +65,6 @@ func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
 			<-start
 			resp, err := s.clients[j].Do(req)
 			if err != nil {
-				log.Printf("err %v", err)
 				atomic.AddUint32(&errCount, 1)
 			} else {
 				defer resp.Body.Close()
