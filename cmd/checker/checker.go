@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -42,10 +43,8 @@ func startServer(checkerAddr string) error {
 
 	timeout := 3 * time.Second
 
-	siteFetchers := 1
-
 	worker := worker_interfaces_private_http.NewEndpoint(
-		worker_application.NewService(ctx, cache, siteFetchers, timeout))
+		worker_application.NewService(ctx, cache, checkersCount(10), timeout))
 
 	worker.AddRoutes(r)
 
@@ -54,4 +53,16 @@ func startServer(checkerAddr string) error {
 		return err
 	}
 	return nil
+}
+
+func checkersCount(def int) int {
+	s := os.Getenv("CHECKERS_COUNT")
+	if s == "" {
+		return def
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil || n <= 0 {
+		return def
+	}
+	return n
 }

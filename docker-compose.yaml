@@ -7,6 +7,7 @@ services:
     environment:
       - "SERVICE_ADDR=:9000"
       - "CHECKER_URL=http://checker:9000/check"
+      - "YANDEX_FETCHERS=5"
     ports:
       - "9000:9000"
   checker:
@@ -15,3 +16,4 @@ services:
     command: /checker
     environment:
       - "CHECKER_ADDR=:9000"
+      - "CHECKERS_COUNT=25"

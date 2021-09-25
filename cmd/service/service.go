@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -53,11 +54,9 @@ func startServer(serviceAddr, checkerUrl string) error {
 
 	timeout := 3 * time.Second
 
-	yandexFetchers := 1
-
 	yandex := yandex_interfaces_private_ipc.NewEndpoint(
 		yandex_application.NewService(
-			yandex_infra_yandex.NewHttpClient, yandexFetchers))
+			yandex_infra_yandex.NewHttpClient, yandexFetchers(1)))
 
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
@@ -84,4 +83,16 @@ func signalContext() context.Context {
 		<-c
 	}()
 	return ctx
+}
+
+func yandexFetchers(def int) int {
+	s := os.Getenv("YANDEX_FETCHERS")
+	if s == "" {
+		return def
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil || n <= 0 {
+		return def
+	}
+	return n
 }
