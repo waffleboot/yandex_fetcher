@@ -12,11 +12,12 @@ type yandex interface {
 }
 
 type benchmark interface {
-	Benchmark(context.Context, []domain.YandexItem) (chan domain.StatsItem, chan error)
+	Benchmark(context.Context, []domain.YandexItem) ([]domain.StatsItem, error)
 }
 
 type cache interface {
 	Get(string) (int, bool)
+	Put(string, int)
 }
 
 type Service struct {

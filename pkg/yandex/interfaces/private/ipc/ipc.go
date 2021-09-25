@@ -25,7 +25,12 @@ func NewEndpoint(s *app.Service) *Endpoint {
 			if item.ctx.Err() == context.DeadlineExceeded {
 				continue
 			}
-			s.GetItems(item.ctx, item.search, item.done, item.errc)
+			items, err := s.GetItems(item.ctx, item.search)
+			if err != nil {
+				item.errc <- err
+				continue
+			}
+			item.done <- items
 		}
 	}()
 	return &Endpoint{
@@ -34,16 +39,16 @@ func NewEndpoint(s *app.Service) *Endpoint {
 }
 
 func (e *Endpoint) AddQuery(ctx context.Context, search string) (chan []domain.YandexItem, chan error) {
-	datc := make(chan []domain.YandexItem, 1)
+	done := make(chan []domain.YandexItem, 1)
 	errc := make(chan error, 1)
 	select {
 	case e.channel <- channelItem{
 		ctx:    ctx,
-		done:   datc,
+		done:   done,
 		errc:   errc,
 		search: search}:
 	case <-ctx.Done():
 		break
 	}
-	return datc, errc
+	return done, errc
 }

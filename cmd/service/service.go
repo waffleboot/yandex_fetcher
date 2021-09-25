@@ -14,33 +14,40 @@ import (
 
 	cache "github.com/waffleboot/playstation_buy/pkg/cache"
 
-	worker_application "github.com/waffleboot/playstation_buy/pkg/worker/application"
-	worker_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/ipc"
-
 	yandex_application "github.com/waffleboot/playstation_buy/pkg/yandex/application"
 	yandex_infra_yandex "github.com/waffleboot/playstation_buy/pkg/yandex/infra/yandex"
 	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
 
 	root_application "github.com/waffleboot/playstation_buy/pkg/root/application"
-	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/root/infra/worker/ipc"
+	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/root/infra/worker/http"
 	root_infra_yandex "github.com/waffleboot/playstation_buy/pkg/root/infra/yandex"
 	root_interfaces_public_http "github.com/waffleboot/playstation_buy/pkg/root/interfaces/public/http"
 )
 
 func run(args []string) int {
-	log.Println("Starting service")
-	if err := startServer(); err != nil {
+
+	serviceAddr := os.Getenv("SERVICE_ADDR")
+	if serviceAddr == "" {
+		return 1
+	}
+
+	checkerUrl := os.Getenv("CHECKER_URL")
+	if checkerUrl == "" {
+		return 1
+	}
+
+	log.Printf("Starting service on %s", serviceAddr)
+
+	if err := startServer(serviceAddr, checkerUrl); err != nil {
 		log.Println(err)
 		return 2
 	}
 	return 0
 }
 
-func startServer() error {
+func startServer(serviceAddr, checkerUrl string) error {
 
 	r := chi.NewRouter()
-
-	ctx := context.Background()
 
 	cache := &cache.MemoryCache{}
 
@@ -52,24 +59,16 @@ func startServer() error {
 		yandex_application.NewService(
 			yandex_infra_yandex.NewHttpClient, yandexFetchers))
 
-	siteFetchers := 1
-
-	worker_channel := make(chan worker_interfaces_private_ipc.ChannelItem, 1)
-
-	worker_interfaces_private_ipc.StartEndpoint(
-		worker_application.NewService(ctx, cache, siteFetchers, timeout),
-		worker_channel)
-
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
 			timeout,
 			root_infra_yandex.NewYandex(yandex),
-			root_infra_worker.NewBenchmarkSupplier(worker_channel),
+			root_infra_worker.NewBenchmarkSupplier(checkerUrl),
 			cache))
 
 	service.AddRoutes(r)
 
-	server := &http.Server{Addr: ":9000", Handler: r}
+	server := &http.Server{Addr: serviceAddr, Handler: r}
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

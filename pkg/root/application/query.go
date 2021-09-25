@@ -2,10 +2,13 @@ package application
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
+
+var ErrInvalidChecker = errors.New("invalid checker")
 
 func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 
@@ -30,15 +33,10 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 		return m, nil
 	}
 
-	datc, errc := s.benchmark.Benchmark(ctx, p)
-	for {
-		select {
-		case d := <-datc:
-			m[d.Host] = d.Count
-		case err := <-errc:
-			return m, err
-		case <-ctx.Done():
-			return m, ctx.Err()
-		}
+	items, err := s.benchmark.Benchmark(ctx, p)
+	for _, v := range items {
+		s.cache.Put(v.Host, v.Count)
+		m[v.Host] = v.Count
 	}
+	return m, err
 }

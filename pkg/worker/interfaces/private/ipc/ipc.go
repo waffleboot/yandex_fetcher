@@ -7,7 +7,7 @@ import (
 
 type ChannelItem struct {
 	Items []domain.YandexItem
-	Datc  chan domain.StatsItem
+	Done  chan domain.StatsItem
 	Errc  chan error
 }
 
@@ -22,7 +22,7 @@ func StartEndpoint(s *app.Service, channel chan ChannelItem) {
 					e.Errc <- err
 					break
 				}
-				e.Datc <- ans
+				e.Done <- ans
 			}
 			for i < len(e.Items) {
 				ans, err := s.Benchmark(e.Items[i])
@@ -30,7 +30,7 @@ func StartEndpoint(s *app.Service, channel chan ChannelItem) {
 				if err != nil {
 					continue
 				}
-				e.Datc <- ans
+				e.Done <- ans
 			}
 		}
 	}()

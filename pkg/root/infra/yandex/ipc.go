@@ -17,9 +17,9 @@ func NewYandex(endpoint *ipc.Endpoint) *Yandex {
 }
 
 func (y *Yandex) GetItems(ctx context.Context, search string) ([]domain.YandexItem, error) {
-	datc, errc := y.endpoint.AddQuery(ctx, search)
+	done, errc := y.endpoint.AddQuery(ctx, search)
 	select {
-	case data := <-datc:
+	case data := <-done:
 		return data, nil
 	case err := <-errc:
 		return nil, err

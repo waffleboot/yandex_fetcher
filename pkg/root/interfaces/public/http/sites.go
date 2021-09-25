@@ -28,6 +28,7 @@ func (e *Endpoint) sites(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		render.JSON(w, r, m)
 		return
 	}
 	w.WriteHeader(http.StatusOK)

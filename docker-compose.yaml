@@ -4,10 +4,14 @@ services:
     container_name: service
     image: service
     command: /service
+    environment:
+      - "SERVICE_ADDR=:9000"
+      - "CHECKER_URL=http://checker:9000/check"
     ports:
-        - "9000:9000"
+      - "9000:9000"
   checker:
     container_name: checker
     image: checker
     command: /checker
-
+    environment:
+      - "CHECKER_ADDR=:9000"
