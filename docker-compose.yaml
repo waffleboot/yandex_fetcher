@@ -1,8 +1,13 @@
 version: "3.9"
 services:
+  service:
+    container_name: service
+    image: service
+    command: /service
+    ports:
+        - "9000:9000"
   checker:
     container_name: checker
     image: checker
     command: /checker
-    ports:
-        - "9000:9000"
+
