@@ -34,3 +34,7 @@ Checker:
 * CHECKER_ADDR - на каком порту пускать
 * CHECKER_FETCHERS - сколько одновременных клиентов нагружать на страницы
     
+
+![в процессе прогрева, timeout 3 sec](images/s1.png)
+
+
