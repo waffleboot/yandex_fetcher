@@ -11,6 +11,8 @@ import (
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 
+	"github.com/go-chi/chi/middleware"
+
 	cache "github.com/waffleboot/playstation_buy/pkg/cache"
 
 	root_infra_service "github.com/waffleboot/playstation_buy/pkg/checker/infra/service/http"
@@ -54,7 +56,10 @@ func startServer(checkerAddr, serviceUrl string) error {
 
 	worker.AddRoutes(r)
 
+	r.Mount("/debug", middleware.Profiler())
+
 	server := &http.Server{Addr: checkerAddr, Handler: r}
+
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}

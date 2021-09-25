@@ -21,7 +21,7 @@ import (
 	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
 
 	root_application "github.com/waffleboot/playstation_buy/pkg/service/application"
-	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/service/infra/worker/http"
+	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/service/infra/checker/http"
 	root_infra_yandex "github.com/waffleboot/playstation_buy/pkg/service/infra/yandex"
 	root_interfaces_public_http "github.com/waffleboot/playstation_buy/pkg/service/interfaces/public/http"
 )

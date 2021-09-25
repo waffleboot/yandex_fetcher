@@ -14,7 +14,7 @@ down:
 	docker-compose down
 
 run1:
-	TIMEOUT=5 SERVICE_ADDR=:9000 CHECKER_URL=http://localhost:8080/check ./service
+	TIMEOUT=3 SERVICE_ADDR=:9000 CHECKER_URL=http://localhost:8080/check ./service
 
 run2:
 	CHECKER_ADDR=:8080 SERVICE_URL=http://localhost:9000/update ./checker
