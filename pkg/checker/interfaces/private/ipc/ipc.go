@@ -1,8 +1,8 @@
 package ipc
 
 import (
+	app "github.com/waffleboot/playstation_buy/pkg/checker/application"
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
-	app "github.com/waffleboot/playstation_buy/pkg/worker/application"
 )
 
 type ChannelItem struct {

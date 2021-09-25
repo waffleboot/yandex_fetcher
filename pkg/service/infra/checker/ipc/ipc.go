@@ -3,8 +3,8 @@ package ipc
 import (
 	"context"
 
+	"github.com/waffleboot/playstation_buy/pkg/checker/interfaces/private/ipc"
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
-	"github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/ipc"
 )
 
 type BenchmarkSupplier struct {
