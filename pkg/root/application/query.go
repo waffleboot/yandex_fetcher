@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
@@ -21,7 +20,7 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 	m := make(map[string]int)
 	p := make([]domain.YandexItem, 0, len(data))
 	for _, v := range data {
-		if n := s.cache.Get(v.Host); n > 0 {
+		if n, ok := s.cache.Get(v.Host); ok {
 			m[v.Host] = n
 		} else {
 			p = append(p, v)
@@ -31,7 +30,6 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 		return m, nil
 	}
 
-	log.Printf("%d not found", len(p))
 	datc, errc := s.benchmark.Benchmark(ctx, p)
 	for {
 		select {

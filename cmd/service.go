@@ -44,18 +44,22 @@ func startServer() error {
 
 	cache := &cache.MemoryCache{}
 
+	timeout := 3 * time.Second
+
+	yandexFetchers := 1
+
 	yandex := yandex_interfaces_private_ipc.NewEndpoint(
 		yandex_application.NewService(
-			yandex_infra_yandex.NewHttpClient, 10))
+			yandex_infra_yandex.NewHttpClient, yandexFetchers))
 
-	n := 25
+	siteFetchers := 1
 
 	worker := worker_interfaces_private_ipc.NewEndpoint(
-		worker_application.NewService(ctx, cache, n, 3*time.Second))
+		worker_application.NewService(ctx, cache, siteFetchers, timeout))
 
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
-			3*time.Second,
+			timeout,
 			root_infra_yandex.NewYandex(yandex),
 			root_infra_worker.NewBenchmarkSupplier(worker),
 			cache))

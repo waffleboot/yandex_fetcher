@@ -16,8 +16,7 @@ type benchmark interface {
 }
 
 type cache interface {
-	Get(string) int
-	// Put(string, int)
+	Get(string) (int, bool)
 }
 
 type Service struct {
