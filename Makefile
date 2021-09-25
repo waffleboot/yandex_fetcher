@@ -19,4 +19,7 @@ run1:
 run2:
 	CHECKER_ADDR=:8080 SERVICE_URL=http://localhost:9000/update ./checker
 
+test:
+	@curl http://localhost:9000/sites?search=купить+playstation  | jq .
+
 FORCE: ;

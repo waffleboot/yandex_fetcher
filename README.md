@@ -48,6 +48,7 @@ Checker:
 * `make run1` и `make run2` запускают service и checker локально
 * `make docker` - собирает docker images
 * `make up` и `make down` - запускают и гасят docker compose
+* `make test` - запуск curl теста
 
 ![в процессе прогрева, timeout 3 sec](images/s1.png)
 
