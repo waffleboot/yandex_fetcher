@@ -2,22 +2,33 @@ package application
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
-
-var ErrInvalidChecker = errors.New("invalid checker")
 
 func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(s.timeout))
 	defer cancel()
 
-	data, err := s.yandex.GetItems(ctx, search)
-	if err != nil {
+	done := make(chan []domain.YandexItem, 1)
+	errc := make(chan error, 1)
+	go func() {
+		data, err := s.yandex.GetItems(search)
+		if err != nil {
+			errc <- err
+			return
+		}
+		done <- data
+	}()
+	var data []domain.YandexItem
+	select {
+	case data = <-done:
+	case err := <-errc:
 		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 
 	m := make(map[string]int)
@@ -29,31 +40,38 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 			p = append(p, v)
 		}
 	}
-	if len(p) == 0 {
-		return m, nil
-	}
 
 	channel := make(chan domain.StatsItem, len(p))
 	go func() {
 		for _, v := range p {
-			ans, err := s.benchmark.Benchmark(v)
+			if _, ok := s.cache.Get(v.Host); ok {
+				continue
+			}
+			count, err := s.benchmark.Benchmark(v.Host, v.Url)
 			if err != nil {
 				continue
 			}
-			s.cache.Put(ans.Host, ans.Count)
-			channel <- ans
+			s.cache.Put(v.Host, count)
+			channel <- domain.StatsItem{
+				Host:  v.Host,
+				Count: count,
+			}
 		}
+		close(channel)
 	}()
 	for {
 		select {
-		case v := <-channel:
-			m[v.Host] = v.Count
+		case item, ok := <-channel:
+			if !ok {
+				return m, nil
+			}
+			m[item.Host] = item.Count
 		case <-ctx.Done():
 			return m, ctx.Err()
 		}
 	}
 }
 
-func (s *Service) Update(host string, count int) {
+func (s *Service) CacheUpdate(host string, count int) {
 	s.cache.Put(host, count)
 }

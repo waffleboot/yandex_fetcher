@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -41,8 +40,6 @@ func startServer(checkerAddr, serviceUrl string) error {
 
 	r := chi.NewRouter()
 
-	ctx := context.Background()
-
 	cache := &cache.MemoryCache{}
 
 	timeout := 3 * time.Second
@@ -50,7 +47,7 @@ func startServer(checkerAddr, serviceUrl string) error {
 	service := root_infra_service.NewInitialService(serviceUrl)
 
 	worker := worker_interfaces_private_http.NewEndpoint(
-		worker_application.NewService(ctx, cache, service, checkersCount(10), timeout))
+		worker_application.NewService(cache, service, checkersCount(10), timeout))
 
 	worker.AddRoutes(r)
 

@@ -52,11 +52,11 @@ func startServer(serviceAddr, checkerUrl string) error {
 
 	cache := &cache.MemoryCache{}
 
-	timeout := 3 * time.Second
+	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
 	yandex := yandex_interfaces_private_ipc.NewEndpoint(
 		yandex_application.NewService(
-			yandex_infra_yandex.NewHttpClient, yandexFetchers(1)))
+			yandex_infra_yandex.NewHttpClient, intConfig("YANDEX_FETCHERS", 1)))
 
 	service := root_interfaces_public_http.NewEndpoint(
 		root_application.NewService(
@@ -85,8 +85,8 @@ func signalContext() context.Context {
 	return ctx
 }
 
-func yandexFetchers(def int) int {
-	s := os.Getenv("YANDEX_FETCHERS")
+func intConfig(name string, def int) int {
+	s := os.Getenv(name)
 	if s == "" {
 		return def
 	}

@@ -1,14 +1,11 @@
 package service
 
 import (
-	"context"
 	"crypto/tls"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
 
 type cache interface {
@@ -17,16 +14,17 @@ type cache interface {
 }
 
 type initialService interface {
-	Update(context.Context, string, int) error
+	CacheUpdate(string, int) error
 }
 
 type Service struct {
 	clients        []http.Client
 	initialService initialService
 	cache          cache
+	token          chan bool
 }
 
-func NewService(ctx context.Context, cache cache, initialService initialService, n int, timeout time.Duration) *Service {
+func NewService(cache cache, initialService initialService, n int, timeout time.Duration) *Service {
 	clients := make([]http.Client, n)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -35,18 +33,22 @@ func NewService(ctx context.Context, cache cache, initialService initialService,
 		clients[i].Timeout = timeout
 		clients[i].Transport = tr
 	}
-	return &Service{clients: clients, cache: cache, initialService: initialService}
+	return &Service{
+		cache:          cache,
+		clients:        clients,
+		token:          make(chan bool, 1),
+		initialService: initialService}
 }
 
-func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
+func (s *Service) Benchmark(host, url string) (int, error) {
 
-	if n, ok := s.cache.Get(item.Host); ok {
-		return domain.StatsItem{Host: item.Host, Count: n}, nil
+	if n, ok := s.cache.Get(host); ok {
+		return n, nil
 	}
 
-	req, err := http.NewRequest(http.MethodGet, item.Url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return domain.StatsItem{}, err
+		return 0, err
 	}
 
 	var errCount uint32
@@ -57,6 +59,11 @@ func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
 	ready := make(chan bool, len(s.clients))
 	start := make(chan bool, len(s.clients))
 
+	s.token <- true
+	if n, ok := s.cache.Get(host); ok {
+		<-s.token
+		return n, nil
+	}
 	for i := 0; i < len(s.clients); i++ {
 		j := i
 		go func() {
@@ -78,13 +85,11 @@ func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
 		start <- true
 	}
 	wg.Wait()
-
 	n := len(s.clients) - int(errCount)
-	s.cache.Put(item.Host, n)
-	s.initialService.Update(context.Background(), item.Host, n)
+	s.cache.Put(host, n)
+	<-s.token
 
-	return domain.StatsItem{
-		Host:  item.Host,
-		Count: n,
-	}, nil
+	s.initialService.CacheUpdate(host, n)
+
+	return n, nil
 }

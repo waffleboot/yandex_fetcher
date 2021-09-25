@@ -3,8 +3,9 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"strconv"
 
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 	"github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/http"
 
 	http2 "net/http"
@@ -22,32 +23,33 @@ func NewBenchmarkSupplier(checkerUrl string) *BenchmarkSupplier {
 	}
 }
 
-func (b *BenchmarkSupplier) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
+func (b *BenchmarkSupplier) Benchmark(host, url string) (int, error) {
 	req := http.Request{
-		Host: item.Host,
-		Url:  item.Url,
+		Host: host,
+		Url:  url,
 	}
 	body, err := json.Marshal(req)
 	if err != nil {
-		return domain.StatsItem{}, err
+		return 0, err
 	}
 	httpRequest, err := http2.NewRequest(http2.MethodPost, b.checkerUrl, bytes.NewReader(body))
 	if err != nil {
-		return domain.StatsItem{}, err
+		return 0, err
 	}
 	resp, err := b.httpClient.Do(httpRequest)
 	if err != nil {
-		return domain.StatsItem{}, err
+		return 0, err
 	}
-	var ans http.Response
-	if err := json.NewDecoder(resp.Body).Decode(&ans); err != nil {
-		return domain.StatsItem{}, err
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
 	}
 	if err := resp.Body.Close(); err != nil {
-		return domain.StatsItem{}, err
+		return 0, err
 	}
-	return domain.StatsItem{
-		Host:  ans.Host,
-		Count: ans.Count,
-	}, nil
+	count, err := strconv.Atoi(string(data))
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

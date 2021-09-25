@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -16,27 +17,11 @@ type channelItem struct {
 }
 
 type Endpoint struct {
-	channel chan channelItem
+	service *app.Service
 }
 
 func NewEndpoint(s *app.Service) *Endpoint {
-	channel := make(chan channelItem, 1)
-	go func() {
-		go func() {
-			for e := range channel {
-				data, err := s.Benchmark(domain.YandexItem{
-					Host: e.req.Host,
-					Url:  e.req.Url,
-				})
-				if err != nil {
-					e.errc <- err
-					continue
-				}
-				e.done <- data
-			}
-		}()
-	}()
-	return &Endpoint{channel: channel}
+	return &Endpoint{service: s}
 }
 
 type Request struct {
@@ -44,47 +29,30 @@ type Request struct {
 	Url  string `json:"url"`
 }
 
-type Response struct {
-	Host  string `json:"host"`
-	Count int    `json:"count"`
-}
-
 func (e *Endpoint) check(w http.ResponseWriter, r *http.Request) {
 	var req Request
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "unable to read request: %v", err)
 		return
 	}
 	if err := r.Body.Close(); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "unable to close request: %v", err)
 		return
 	}
 	if err := json.Unmarshal(body, &req); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "unable to parse request: %v", err)
 		return
 	}
-
-	done := make(chan domain.StatsItem, 1)
-	errc := make(chan error)
-	item := channelItem{
-		req:  req,
-		done: done,
-		errc: errc,
-	}
-	e.channel <- item
-	select {
-	case data := <-done:
-		resp := Response{
-			Host:  data.Host,
-			Count: data.Count,
-		}
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			return
-		}
-	case <-errc:
+	count, err := e.service.Benchmark(req.Host, req.Url)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(w, "unable to benchmark request: %v", err)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "%d", count)
 }

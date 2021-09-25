@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 
 	"github.com/waffleboot/playstation_buy/pkg/service/interfaces/public/http"
@@ -22,8 +21,8 @@ func NewInitialService(serviceUrl string) *InitialService {
 	}
 }
 
-func (b *InitialService) Update(ctx context.Context, host string, count int) error {
-	req := http.Update{
+func (b *InitialService) CacheUpdate(host string, count int) error {
+	req := http.CacheUpdate{
 		Host:  host,
 		Count: count,
 	}
@@ -31,7 +30,7 @@ func (b *InitialService) Update(ctx context.Context, host string, count int) err
 	if err != nil {
 		return err
 	}
-	httpRequest, err := http2.NewRequestWithContext(ctx, http2.MethodPost, b.serviceUrl, bytes.NewReader(body))
+	httpRequest, err := http2.NewRequest(http2.MethodPost, b.serviceUrl, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}

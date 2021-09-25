@@ -5,6 +5,7 @@ services:
     image: service
     command: /service
     environment:
+      - "TIMEOUT=10"
       - "SERVICE_ADDR=:9000"
       - "CHECKER_URL=http://checker:9000/check"
       - "YANDEX_FETCHERS=5"

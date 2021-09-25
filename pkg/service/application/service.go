@@ -1,18 +1,17 @@
 package application
 
 import (
-	"context"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
 
 type yandex interface {
-	GetItems(context.Context, string) ([]domain.YandexItem, error)
+	GetItems(string) ([]domain.YandexItem, error)
 }
 
 type benchmark interface {
-	Benchmark(domain.YandexItem) (domain.StatsItem, error)
+	Benchmark(string, string) (int, error)
 }
 
 type cache interface {

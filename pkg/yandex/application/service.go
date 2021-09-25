@@ -1,12 +1,10 @@
 package application
 
 import (
-	"context"
-
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
 
-type fetcher = func(context.Context, string) ([]byte, error)
+type fetcher = func(string) ([]byte, error)
 
 type Service struct {
 	fetchers chan fetcher
@@ -20,9 +18,9 @@ func NewService(factory func() fetcher, n int) *Service {
 	return &Service{fetchers: fetchers}
 }
 
-func (s *Service) GetItems(ctx context.Context, search string) ([]domain.YandexItem, error) {
+func (s *Service) GetItems(search string) ([]domain.YandexItem, error) {
 	fetcher := <-s.fetchers
-	data, err := fetcher(ctx, search)
+	data, err := fetcher(search)
 	s.fetchers <- fetcher
 	if err != nil {
 		return nil, err
