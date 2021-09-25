@@ -4,24 +4,28 @@ import (
 	"context"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
-	"github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
 )
 
-type YandexSupplier struct {
-	channel chan ipc.ChannelItem
+type Endpoint interface {
+	AddQuery(context.Context, string) (chan []domain.YandexItem, chan error)
 }
 
-func NewYandexSupplier(channel chan ipc.ChannelItem) *YandexSupplier {
-	return &YandexSupplier{channel: channel}
+type Yandex struct {
+	endpoint Endpoint
 }
 
-func (y *YandexSupplier) GetYandexItems(ctx context.Context, search string) ([]domain.YandexItem, error) {
-	item := ipc.NewChannelItem(ctx, search)
-	y.channel <- item
+func NewYandex(endpoint Endpoint) *Yandex {
+	return &Yandex{endpoint: endpoint}
+}
+
+func (y *Yandex) GetItems(ctx context.Context, search string) ([]domain.YandexItem, error) {
+	datc, errc := y.endpoint.AddQuery(ctx, search)
 	select {
-	case data := <-item.Done:
+	case data := <-datc:
 		return data, nil
-	case err := <-item.Err:
+	case err := <-errc:
 		return nil, err
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 }

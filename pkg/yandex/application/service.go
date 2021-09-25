@@ -6,31 +6,31 @@ import (
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
 
-type supplier = func(context.Context, string) ([]byte, error)
+type parser = func(context.Context, string) ([]byte, error)
 
 type Service struct {
-	suppliers chan supplier
+	parsers chan parser
 }
 
-func NewService(factory func() supplier, n int) *Service {
-	suppliers := make(chan supplier, n)
+func NewService(factory func() parser, n int) *Service {
+	parsers := make(chan parser, n)
 	for i := 0; i < n; i++ {
-		suppliers <- factory()
+		parsers <- factory()
 	}
-	return &Service{suppliers: suppliers}
+	return &Service{parsers: parsers}
 }
 
-func (s *Service) GetYandexItems(ctx context.Context, search string, done chan []domain.YandexItem, errorChannel chan error) {
-	supplier := <-s.suppliers
+func (s *Service) GetItems(ctx context.Context, search string, done chan []domain.YandexItem, errc chan error) {
+	parser := <-s.parsers
 	go func() {
-		data, err := supplier(ctx, search)
-		s.suppliers <- supplier
+		data, err := parser(ctx, search)
+		s.parsers <- parser
 		if err != nil {
-			errorChannel <- err
+			errc <- err
 		}
 		result := parseYandexResponse(data)
 		if result.Error != nil {
-			errorChannel <- result.Error
+			errc <- result.Error
 		}
 		out := make([]domain.YandexItem, 0, len(result.Items))
 		for _, v := range result.Items {

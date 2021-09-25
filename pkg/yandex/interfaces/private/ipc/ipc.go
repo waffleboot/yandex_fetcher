@@ -7,26 +7,40 @@ import (
 	app "github.com/waffleboot/playstation_buy/pkg/yandex/application"
 )
 
-type ChannelItem struct {
-	Done   chan []domain.YandexItem
-	Err    chan error
-	Ctx    context.Context
-	Search string
+type channelItem struct {
+	done   chan []domain.YandexItem
+	errc   chan error
+	ctx    context.Context
+	search string
 }
 
-func NewChannelItem(ctx context.Context, search string) ChannelItem {
-	return ChannelItem{
-		Ctx:    ctx,
-		Search: search,
-		Done:   make(chan []domain.YandexItem, 1),
-		Err:    make(chan error),
+type Endpoint struct {
+	channel chan channelItem
+}
+
+func NewEndpoint(s *app.Service) *Endpoint {
+	channel := make(chan channelItem, 1)
+	go func() {
+		for item := range channel {
+			if item.ctx.Err() == context.DeadlineExceeded {
+				continue
+			}
+			s.GetItems(item.ctx, item.search, item.done, item.errc)
+		}
+	}()
+	return &Endpoint{
+		channel: channel,
 	}
 }
 
-func StartEndpoint(channel chan ChannelItem, s *app.Service) {
-	go func() {
-		for task := range channel {
-			s.GetYandexItems(task.Ctx, task.Search, task.Done, task.Err)
-		}
-	}()
+func (e *Endpoint) AddQuery(ctx context.Context, search string) (chan []domain.YandexItem, chan error) {
+	datc := make(chan []domain.YandexItem, 1)
+	errc := make(chan error, 1)
+	e.channel <- channelItem{
+		ctx:    ctx,
+		done:   datc,
+		errc:   errc,
+		search: search,
+	}
+	return datc, errc
 }
