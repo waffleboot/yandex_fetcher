@@ -13,6 +13,8 @@ import (
 
 	cache "github.com/waffleboot/playstation_buy/pkg/cache"
 
+	root_infra_service "github.com/waffleboot/playstation_buy/pkg/worker/infra/service/http"
+
 	worker_application "github.com/waffleboot/playstation_buy/pkg/worker/application"
 	worker_interfaces_private_http "github.com/waffleboot/playstation_buy/pkg/worker/interfaces/private/http"
 )
@@ -24,16 +26,18 @@ func run(args []string) int {
 		return 1
 	}
 
+	serviceUrl := os.Getenv("SERVICE_URL")
+
 	log.Printf("Starting service on %s", checkerAddr)
 
-	if err := startServer(checkerAddr); err != nil {
+	if err := startServer(checkerAddr, serviceUrl); err != nil {
 		log.Println(err)
 		return 2
 	}
 	return 0
 }
 
-func startServer(checkerAddr string) error {
+func startServer(checkerAddr, serviceUrl string) error {
 
 	r := chi.NewRouter()
 
@@ -43,8 +47,10 @@ func startServer(checkerAddr string) error {
 
 	timeout := 3 * time.Second
 
+	service := root_infra_service.NewInitialService(serviceUrl)
+
 	worker := worker_interfaces_private_http.NewEndpoint(
-		worker_application.NewService(ctx, cache, checkersCount(10), timeout))
+		worker_application.NewService(ctx, cache, service, checkersCount(10), timeout))
 
 	worker.AddRoutes(r)
 

@@ -6,4 +6,5 @@ import (
 
 func (e *Endpoint) AddRoutes(router *chi.Mux) {
 	router.Get("/sites", e.sites)
+	router.Post("/update", e.update)
 }

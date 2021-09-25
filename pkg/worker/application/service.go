@@ -17,12 +17,17 @@ type cache interface {
 	Put(string, int)
 }
 
-type Service struct {
-	clients []http.Client
-	cache   cache
+type initialService interface {
+	Update(context.Context, string, int) error
 }
 
-func NewService(ctx context.Context, cache cache, n int, timeout time.Duration) *Service {
+type Service struct {
+	clients        []http.Client
+	initialService initialService
+	cache          cache
+}
+
+func NewService(ctx context.Context, cache cache, initialService initialService, n int, timeout time.Duration) *Service {
 	clients := make([]http.Client, n)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -31,7 +36,7 @@ func NewService(ctx context.Context, cache cache, n int, timeout time.Duration) 
 		clients[i].Timeout = timeout
 		clients[i].Transport = tr
 	}
-	return &Service{clients: clients, cache: cache}
+	return &Service{clients: clients, cache: cache, initialService: initialService}
 }
 
 func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
@@ -78,6 +83,7 @@ func (s *Service) Benchmark(item domain.YandexItem) (domain.StatsItem, error) {
 
 	n := len(s.clients) - int(errCount)
 	s.cache.Put(item.Host, n)
+	s.initialService.Update(context.Background(), item.Host, n)
 
 	return domain.StatsItem{
 		Host:  item.Host,

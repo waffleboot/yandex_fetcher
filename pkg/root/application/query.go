@@ -40,3 +40,7 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 	}
 	return m, err
 }
+
+func (s *Service) Update(host string, count int) {
+	s.cache.Put(host, count)
+}
