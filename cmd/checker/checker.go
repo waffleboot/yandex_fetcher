@@ -32,29 +32,37 @@ func run(args []string) int {
 
 	serviceUrl := os.Getenv("SERVICE_URL")
 
+	redisAddr := os.Getenv("REDIS_URL")
+
 	log.Printf("Starting service on %s", checkerAddr)
 
-	if err := startServer(checkerAddr, serviceUrl); err != nil {
+	if err := startServer(checkerAddr, serviceUrl, redisAddr); err != nil {
 		log.Println(err)
 		return 2
 	}
 	return 0
 }
 
-func startServer(checkerAddr, serviceUrl string) error {
+func startServer(checkerAddr, serviceUrl, redisAddr string) error {
 
 	r := chi.NewRouter()
 
 	log, _ := zap.NewProduction()
 
-	cache := cache.NewMemoryCache(log)
+	var cach cache.Cache
+
+	if redisAddr != "" {
+		cach = cache.NewRedisCache(redisAddr, log)
+	} else {
+		cach = cache.NewMemoryCache(log)
+	}
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
 	service := root_infra_service.NewInitialService(serviceUrl)
 
 	worker := worker_interfaces_private_http.NewEndpoint(
-		worker_application.NewService(cache, service, intConfig("CHECKERS_COUNT", 10), timeout))
+		worker_application.NewService(cach, service, intConfig("CHECKERS_COUNT", 10), timeout))
 
 	worker.AddRoutes(r)
 

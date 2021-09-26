@@ -37,22 +37,30 @@ func run(args []string) int {
 		return 1
 	}
 
+	redisAddr := os.Getenv("REDIS_URL")
+
 	log.Printf("Starting service on %s", serviceAddr)
 
-	if err := startServer(serviceAddr, checkerUrl); err != nil {
+	if err := startServer(serviceAddr, checkerUrl, redisAddr); err != nil {
 		log.Println(err)
 		return 2
 	}
 	return 0
 }
 
-func startServer(serviceAddr, checkerUrl string) error {
+func startServer(serviceAddr, checkerUrl, redisAddr string) error {
 
 	r := chi.NewRouter()
 
 	log, _ := zap.NewProduction()
 
-	cache := cache.NewMemoryCache(log)
+	var cach cache.Cache
+
+	if redisAddr != "" {
+		cach = cache.NewRedisCache(redisAddr, log)
+	} else {
+		cach = cache.NewMemoryCache(log)
+	}
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
@@ -65,7 +73,7 @@ func startServer(serviceAddr, checkerUrl string) error {
 			timeout,
 			root_infra_yandex.NewYandex(yandex),
 			root_infra_worker.NewBenchmarkSupplier(checkerUrl),
-			cache))
+			cach))
 
 	service.AddRoutes(r)
 
