@@ -98,7 +98,7 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 		start <- true
 	}
 	wg.Wait()
-	n := len(s.clients) - int(errCount)
+	n := len(s.clients) - int(atomic.LoadUint32(&errCount))
 	s.cache.Put(host, n)
 	s.token.Unlock()
 
