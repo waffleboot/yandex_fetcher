@@ -15,12 +15,12 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 
-	cache "github.com/waffleboot/playstation_buy/pkg/cache"
+	cache "github.com/waffleboot/yandex_fetcher/pkg/cache"
 
-	root_infra_service "github.com/waffleboot/playstation_buy/pkg/checker/infra/service/http"
+	root_infra_service "github.com/waffleboot/yandex_fetcher/pkg/checker/infra/service/http"
 
-	worker_application "github.com/waffleboot/playstation_buy/pkg/checker/application"
-	worker_interfaces_private_http "github.com/waffleboot/playstation_buy/pkg/checker/interfaces/private/http"
+	worker_application "github.com/waffleboot/yandex_fetcher/pkg/checker/application"
+	worker_interfaces_private_http "github.com/waffleboot/yandex_fetcher/pkg/checker/interfaces/private/http"
 )
 
 func run(args []string) int {

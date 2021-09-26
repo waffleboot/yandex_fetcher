@@ -1,8 +1,8 @@
 package ipc
 
 import (
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
-	app "github.com/waffleboot/playstation_buy/pkg/yandex/application"
+	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
+	app "github.com/waffleboot/yandex_fetcher/pkg/yandex/application"
 )
 
 type Endpoint struct {

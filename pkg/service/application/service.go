@@ -3,7 +3,7 @@ package application
 import (
 	"time"
 
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 )
 
 type yandex interface {

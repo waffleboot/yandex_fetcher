@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 )
 
 func (s *Service) fetchYandex(ctx context.Context, search string) ([]domain.YandexItem, error) {

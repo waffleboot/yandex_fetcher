@@ -13,16 +13,16 @@ import (
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 
-	cache "github.com/waffleboot/playstation_buy/pkg/cache"
+	cache "github.com/waffleboot/yandex_fetcher/pkg/cache"
 
-	yandex_application "github.com/waffleboot/playstation_buy/pkg/yandex/application"
-	yandex_infra_yandex "github.com/waffleboot/playstation_buy/pkg/yandex/infra/yandex"
-	yandex_interfaces_private_ipc "github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
+	yandex_application "github.com/waffleboot/yandex_fetcher/pkg/yandex/application"
+	yandex_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/yandex/infra/yandex"
+	yandex_interfaces_private_ipc "github.com/waffleboot/yandex_fetcher/pkg/yandex/interfaces/private/ipc"
 
-	root_application "github.com/waffleboot/playstation_buy/pkg/service/application"
-	root_infra_worker "github.com/waffleboot/playstation_buy/pkg/service/infra/checker/http"
-	root_infra_yandex "github.com/waffleboot/playstation_buy/pkg/service/infra/yandex"
-	root_interfaces_public_http "github.com/waffleboot/playstation_buy/pkg/service/interfaces/public/http"
+	root_application "github.com/waffleboot/yandex_fetcher/pkg/service/application"
+	root_infra_worker "github.com/waffleboot/yandex_fetcher/pkg/service/infra/checker/http"
+	root_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/service/infra/yandex"
+	root_interfaces_public_http "github.com/waffleboot/yandex_fetcher/pkg/service/interfaces/public/http"
 )
 
 func run(args []string) int {

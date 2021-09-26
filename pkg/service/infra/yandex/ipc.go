@@ -1,9 +1,9 @@
 package ipc
 
 import (
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 
-	"github.com/waffleboot/playstation_buy/pkg/yandex/interfaces/private/ipc"
+	"github.com/waffleboot/yandex_fetcher/pkg/yandex/interfaces/private/ipc"
 )
 
 type Yandex struct {

@@ -13,7 +13,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	app "github.com/waffleboot/playstation_buy/pkg/service/application"
+	app "github.com/waffleboot/yandex_fetcher/pkg/service/application"
 )
 
 type Endpoint struct {

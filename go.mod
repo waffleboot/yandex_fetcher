@@ -1,4 +1,4 @@
-module github.com/waffleboot/playstation_buy
+module github.com/waffleboot/yandex_fetcher
 
 go 1.17
 

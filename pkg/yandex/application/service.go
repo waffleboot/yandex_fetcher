@@ -1,7 +1,7 @@
 package application
 
 import (
-	"github.com/waffleboot/playstation_buy/pkg/common/domain"
+	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 )
 
 type fetcher = func(string) ([]byte, error)
