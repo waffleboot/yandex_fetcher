@@ -18,7 +18,7 @@ import (
 	cache "github.com/waffleboot/yandex_fetcher/pkg/cache"
 
 	checker_app "github.com/waffleboot/yandex_fetcher/pkg/checker/application"
-	checker_infra_service "github.com/waffleboot/yandex_fetcher/pkg/checker/infra/service/http"
+	checker_service "github.com/waffleboot/yandex_fetcher/pkg/checker/infra/service/http"
 	checker_http "github.com/waffleboot/yandex_fetcher/pkg/checker/inter/private/http"
 )
 
@@ -58,7 +58,7 @@ func startServer(checkerAddr, serviceUrl, redisAddr string) error {
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
-	service := checker_infra_service.NewInitialService(serviceUrl)
+	service := checker_service.NewInitialService(serviceUrl)
 
 	checker := checker_app.NewService(cach, service, intConfig("CHECKERS_COUNT", 10), timeout)
 
