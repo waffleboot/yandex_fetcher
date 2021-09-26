@@ -33,7 +33,7 @@ func NewService(cache cache, initialService initialService, n int, timeout time.
 
 	clients := make([]http.Client, n)
 	for i := 0; i < n; i++ {
-		clients[i].Timeout = timeout
+		clients[i].Timeout = 30 * time.Second
 		clients[i].Transport = tr
 		clients[i].Jar = &MyJar{}
 	}
