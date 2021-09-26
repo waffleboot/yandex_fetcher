@@ -3,7 +3,7 @@ service: FORCE
 	go build -o service ./cmd/service
 	go build -o checker ./cmd/checker
 
-docker: docker/service.dockerfile docker/checker.dockerfile
+docker: docker/service.dockerfile docker/checker.dockerfile FORCE
 	docker build -t service -f docker/service.dockerfile .
 	docker build -t checker -f docker/checker.dockerfile .
 
