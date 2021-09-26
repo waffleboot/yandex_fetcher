@@ -22,9 +22,4 @@ run2:
 test:
 	@curl http://localhost:9000/sites?search=купить+playstation  | jq .
 
-mvideo: FORCE
-	rm mvideo.html
-	go run ./cmd/mvideo
-	open mvideo.html
-
 FORCE: ;
