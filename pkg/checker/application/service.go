@@ -50,11 +50,6 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 		return n, nil
 	}
 
-	req := fasthttp.AcquireRequest()
-	req.SetRequestURI(url)
-	req.Header.SetMethodBytes([]byte(http.MethodGet))
-	req.Header.Set("Connection", "close")
-
 	var errCount uint32
 
 	var wg sync.WaitGroup
@@ -71,13 +66,19 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	for i := 0; i < s.clients; i++ {
 		go func() {
 			defer wg.Done()
+
+			req := fasthttp.AcquireRequest()
+			req.SetRequestURI(url)
+			req.Header.SetMethodBytes([]byte(http.MethodGet))
+			req.Header.Set("Connection", "close")
+
 			resp := fasthttp.AcquireResponse()
 			ready <- true
 			<-start
 
-			err := s.client.Do(req, resp)
-			fasthttp.ReleaseRequest(req)
+			err := s.client.DoRedirects(req, resp, 10)
 			fasthttp.ReleaseResponse(resp)
+			fasthttp.ReleaseRequest(req)
 
 			if err != nil {
 				atomic.AddUint32(&errCount, 1)
