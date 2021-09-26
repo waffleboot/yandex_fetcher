@@ -15,9 +15,7 @@ type cache interface {
 	Put(string, int)
 }
 
-type initialService interface {
-	CacheUpdate(string, int) error
-}
+type initialService = func(string, int) error
 
 type Service struct {
 	clients        []http.Client
@@ -102,7 +100,7 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	s.cache.Put(host, n)
 	s.token.Unlock()
 
-	s.initialService.CacheUpdate(host, n)
+	s.initialService(host, n)
 
 	return n, nil
 }

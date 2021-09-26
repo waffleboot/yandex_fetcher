@@ -13,7 +13,7 @@ func (s *Service) fetchYandex(ctx context.Context, search string) ([]domain.Yand
 	done := make(chan []domain.YandexItem, 1)
 	errc := make(chan error, 1)
 	go func() {
-		data, err := s.yandex.GetItems(search)
+		data, err := s.yandex(search)
 		if err != nil {
 			errc <- err
 			return
@@ -60,7 +60,7 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 				}
 				continue
 			}
-			count, err := s.benchmark.Benchmark(v.Host, v.Url)
+			count, err := s.benchmark(v.Host, v.Url)
 			if err != nil {
 				continue
 			}

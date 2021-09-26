@@ -21,7 +21,6 @@ import (
 
 	root_application "github.com/waffleboot/yandex_fetcher/pkg/service/application"
 	root_infra_worker "github.com/waffleboot/yandex_fetcher/pkg/service/infra/checker/http"
-	root_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/service/infra/yandex"
 	root_inter_public_http "github.com/waffleboot/yandex_fetcher/pkg/service/inter/public/http"
 )
 
@@ -71,7 +70,7 @@ func startServer(serviceAddr, checkerUrl, redisAddr string) error {
 	service := root_inter_public_http.NewEndpoint(
 		root_application.NewService(
 			timeout,
-			root_infra_yandex.NewYandex(yandex),
+			yandex.AddQuery,
 			root_infra_worker.NewBenchmarkSupplier(checkerUrl),
 			cach))
 

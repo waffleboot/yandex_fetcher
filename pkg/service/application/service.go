@@ -6,13 +6,9 @@ import (
 	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 )
 
-type yandex interface {
-	GetItems(string) ([]domain.YandexItem, error)
-}
+type yandex = func(string) ([]domain.YandexItem, error)
 
-type benchmark interface {
-	Benchmark(string, string) (int, error)
-}
+type benchmark = func(string, string) (int, error)
 
 type cache interface {
 	Get(string) (int, bool)
