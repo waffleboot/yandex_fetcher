@@ -20,15 +20,14 @@ func (s *Service) fetchYandex(ctx context.Context, search string) ([]domain.Yand
 		}
 		done <- data
 	}()
-	var data []domain.YandexItem
 	select {
-	case data = <-done:
+	case data := <-done:
+		return data, nil
 	case err := <-errc:
 		return nil, fmt.Errorf("unable to fetch yandex page: %w", err)
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
-	return data, nil
 }
 
 func (s *Service) ProcessQuery(search string) (map[string]int, error) {
