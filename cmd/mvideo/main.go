@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -37,13 +36,6 @@ func run(url string) error {
 	defer out.Close()
 	client := http.Client{
 		Jar: &MyJar{},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			// log.Printf("check redirect: %v\n", req.URL)
-			if len(via) > 1 {
-				return errors.New("stop")
-			}
-			return nil
-		},
 	}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
