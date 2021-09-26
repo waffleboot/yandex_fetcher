@@ -41,7 +41,7 @@ func run(url string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:92.0) Gecko/20100101 Firefox/92.0")
+	req.Header.Set("User-Agent", "Mozilla/5.0 Gecko/20100101 Firefox/92.0")
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
