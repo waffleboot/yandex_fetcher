@@ -8,11 +8,11 @@ import (
 
 	"github.com/waffleboot/yandex_fetcher/pkg/checker/inter/private/http"
 
-	http2 "net/http"
+	net_http "net/http"
 )
 
 func NewBenchmarkSupplier(checkerUrl string) func(string, string) (int, error) {
-	var httpClient http2.Client
+	var httpClient net_http.Client
 	return func(host, url string) (int, error) {
 		req := http.Request{
 			Host: host,
@@ -22,7 +22,7 @@ func NewBenchmarkSupplier(checkerUrl string) func(string, string) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		httpRequest, err := http2.NewRequest(http2.MethodPost, checkerUrl, bytes.NewReader(body))
+		httpRequest, err := net_http.NewRequest(net_http.MethodPost, checkerUrl, bytes.NewReader(body))
 		if err != nil {
 			return 0, err
 		}
