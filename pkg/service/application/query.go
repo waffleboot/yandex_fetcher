@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
@@ -26,7 +27,7 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 	select {
 	case data = <-done:
 	case err := <-errc:
-		return nil, err
+		return nil, fmt.Errorf("unable to fetch yandex page: %w", err)
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	}
@@ -44,7 +45,11 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 	channel := make(chan domain.StatsItem, len(p))
 	go func() {
 		for _, v := range p {
-			if _, ok := s.cache.Get(v.Host); ok {
+			if count, ok := s.cache.Get(v.Host); ok {
+				channel <- domain.StatsItem{
+					Host:  v.Host,
+					Count: count,
+				}
 				continue
 			}
 			count, err := s.benchmark.Benchmark(v.Host, v.Url)
