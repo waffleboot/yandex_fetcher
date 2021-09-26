@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/waffleboot/yandex_fetcher/pkg/service/interfaces/public/http"
+	"github.com/waffleboot/yandex_fetcher/pkg/service/inter/public/http"
 
 	http2 "net/http"
 )

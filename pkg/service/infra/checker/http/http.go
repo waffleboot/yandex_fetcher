@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
-	"github.com/waffleboot/yandex_fetcher/pkg/checker/interfaces/private/http"
+	"github.com/waffleboot/yandex_fetcher/pkg/checker/inter/private/http"
 
 	http2 "net/http"
 )

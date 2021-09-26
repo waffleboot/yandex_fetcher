@@ -17,12 +17,12 @@ import (
 
 	yandex_application "github.com/waffleboot/yandex_fetcher/pkg/yandex/application"
 	yandex_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/yandex/infra/yandex"
-	yandex_interfaces_private_ipc "github.com/waffleboot/yandex_fetcher/pkg/yandex/interfaces/private/ipc"
+	yandex_inter_private_ipc "github.com/waffleboot/yandex_fetcher/pkg/yandex/inter/private/ipc"
 
 	root_application "github.com/waffleboot/yandex_fetcher/pkg/service/application"
 	root_infra_worker "github.com/waffleboot/yandex_fetcher/pkg/service/infra/checker/http"
 	root_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/service/infra/yandex"
-	root_interfaces_public_http "github.com/waffleboot/yandex_fetcher/pkg/service/interfaces/public/http"
+	root_inter_public_http "github.com/waffleboot/yandex_fetcher/pkg/service/inter/public/http"
 )
 
 func run(args []string) int {
@@ -64,11 +64,11 @@ func startServer(serviceAddr, checkerUrl, redisAddr string) error {
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
-	yandex := yandex_interfaces_private_ipc.NewEndpoint(
+	yandex := yandex_inter_private_ipc.NewEndpoint(
 		yandex_application.NewService(
 			yandex_infra_yandex.NewHttpClient, intConfig("YANDEX_FETCHERS", 1)))
 
-	service := root_interfaces_public_http.NewEndpoint(
+	service := root_inter_public_http.NewEndpoint(
 		root_application.NewService(
 			timeout,
 			root_infra_yandex.NewYandex(yandex),

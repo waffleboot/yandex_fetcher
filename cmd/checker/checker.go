@@ -20,7 +20,7 @@ import (
 	root_infra_service "github.com/waffleboot/yandex_fetcher/pkg/checker/infra/service/http"
 
 	worker_application "github.com/waffleboot/yandex_fetcher/pkg/checker/application"
-	worker_interfaces_private_http "github.com/waffleboot/yandex_fetcher/pkg/checker/interfaces/private/http"
+	worker_inter_private_http "github.com/waffleboot/yandex_fetcher/pkg/checker/inter/private/http"
 )
 
 func run(args []string) int {
@@ -61,7 +61,7 @@ func startServer(checkerAddr, serviceUrl, redisAddr string) error {
 
 	service := root_infra_service.NewInitialService(serviceUrl)
 
-	worker := worker_interfaces_private_http.NewEndpoint(
+	worker := worker_inter_private_http.NewEndpoint(
 		worker_application.NewService(cach, service, intConfig("CHECKERS_COUNT", 10), timeout))
 
 	worker.AddRoutes(r)

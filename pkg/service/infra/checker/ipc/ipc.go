@@ -3,7 +3,7 @@ package ipc
 import (
 	"context"
 
-	"github.com/waffleboot/yandex_fetcher/pkg/checker/interfaces/private/ipc"
+	"github.com/waffleboot/yandex_fetcher/pkg/checker/inter/private/ipc"
 	"github.com/waffleboot/yandex_fetcher/pkg/common/domain"
 )
 
