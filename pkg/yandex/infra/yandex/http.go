@@ -2,7 +2,7 @@ package http
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -22,7 +22,7 @@ func NewHttpClient() func(string) ([]byte, error) {
 			return nil, err
 		}
 		defer resp.Body.Close()
-		data, err := io.ReadAll(resp.Body)
+		data, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
