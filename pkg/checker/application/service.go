@@ -1,12 +1,13 @@
 package service
 
 import (
+	"crypto/tls"
+	"log"
 	"net/http"
+	"net/url"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/valyala/fasthttp"
 )
 
 type cache interface {
@@ -19,27 +20,27 @@ type initialService interface {
 }
 
 type Service struct {
-	clients        int
-	client         fasthttp.Client
+	clients        []http.Client
 	initialService initialService
 	cache          cache
 	token          chan bool
 }
 
 func NewService(cache cache, initialService initialService, n int, timeout time.Duration) *Service {
-	// tr := &http.Transport{
-	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// }
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 
-	// client.Timeout = timeout
-	// client.Transport = tr
+	clients := make([]http.Client, n)
+	for i := 0; i < n; i++ {
+		clients[i].Timeout = timeout
+		clients[i].Transport = tr
+		clients[i].Jar = &MyJar{}
+	}
 
 	return &Service{
-		cache:   cache,
-		clients: n,
-		client: fasthttp.Client{
-			MaxConnsPerHost: n,
-		},
+		cache:          cache,
+		clients:        clients,
 		token:          make(chan bool, 1),
 		initialService: initialService}
 }
@@ -53,50 +54,64 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	var errCount uint32
 
 	var wg sync.WaitGroup
-	wg.Add(s.clients)
+	wg.Add(len(s.clients))
 
-	ready := make(chan bool, s.clients)
-	start := make(chan bool, s.clients)
+	ready := make(chan bool, len(s.clients))
+	start := make(chan bool, len(s.clients))
 
 	s.token <- true
 	if n, ok := s.cache.Get(host); ok {
 		<-s.token
 		return n, nil
 	}
-	for i := 0; i < s.clients; i++ {
+	for i := 0; i < len(s.clients); i++ {
+		j := i
 		go func() {
 			defer wg.Done()
 
-			req := fasthttp.AcquireRequest()
-			req.SetRequestURI(url)
-			req.Header.SetMethodBytes([]byte(http.MethodGet))
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			if err != nil {
+				log.Printf("error on %s %v", url, err)
+				atomic.AddUint32(&errCount, 1)
+				return
+			}
 			req.Header.Set("Connection", "close")
-
-			resp := fasthttp.AcquireResponse()
+			req.Header.Set("User-Agent", "Mozilla/5.0 Gecko/20100101 Firefox/92.0")
 			ready <- true
 			<-start
-
-			err := s.client.DoRedirects(req, resp, 10)
-			fasthttp.ReleaseResponse(resp)
-			fasthttp.ReleaseRequest(req)
-
+			resp, err := s.clients[j].Do(req)
 			if err != nil {
+				log.Printf("error on %s %v", url, err)
 				atomic.AddUint32(&errCount, 1)
+				return
 			}
+			defer resp.Body.Close()
 		}()
 	}
-	for i := 0; i < s.clients; i++ {
+	for i := 0; i < len(s.clients); i++ {
 		<-ready
 	}
-	for i := 0; i < s.clients; i++ {
+	for i := 0; i < len(s.clients); i++ {
 		start <- true
 	}
 	wg.Wait()
-	n := s.clients - int(errCount)
+	n := len(s.clients) - int(errCount)
 	s.cache.Put(host, n)
 	<-s.token
 
 	s.initialService.CacheUpdate(host, n)
 
 	return n, nil
+}
+
+type MyJar struct {
+	cookies []*http.Cookie
+}
+
+func (j *MyJar) SetCookies(u *url.URL, cookies []*http.Cookie) {
+	j.cookies = cookies
+}
+
+func (j *MyJar) Cookies(u *url.URL) []*http.Cookie {
+	return j.cookies
 }
