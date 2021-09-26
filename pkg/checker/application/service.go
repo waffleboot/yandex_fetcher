@@ -69,6 +69,9 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 			defer wg.Done()
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
+
+			ready <- true
+
 			if err != nil {
 				log.Printf("error on %s %v", url, err)
 				atomic.AddUint32(&errCount, 1)
@@ -76,8 +79,9 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 			}
 			req.Header.Set("Connection", "close")
 			req.Header.Set("User-Agent", "Mozilla/5.0 Gecko/20100101 Firefox/92.0")
-			ready <- true
+
 			<-start
+
 			resp, err := s.clients[j].Do(req)
 			if err != nil {
 				log.Printf("error on %s %v", url, err)
