@@ -1,0 +1,18 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: make
+        run: make
+      - name: make docker
+        run: make docker
