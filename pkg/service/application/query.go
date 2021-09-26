@@ -3,16 +3,13 @@ package application
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/waffleboot/playstation_buy/pkg/common/domain"
 )
 
-func (s *Service) ProcessQuery(search string) (map[string]int, error) {
-
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(s.timeout))
-	defer cancel()
-
+func (s *Service) fetchYandex(ctx context.Context, search string) ([]domain.YandexItem, error) {
 	done := make(chan []domain.YandexItem, 1)
 	errc := make(chan error, 1)
 	go func() {
@@ -30,6 +27,18 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 		return nil, fmt.Errorf("unable to fetch yandex page: %w", err)
 	case <-ctx.Done():
 		return nil, ctx.Err()
+	}
+	return data, nil
+}
+
+func (s *Service) ProcessQuery(search string) (map[string]int, error) {
+
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(s.timeout))
+	defer cancel()
+
+	data, err := s.fetchYandex(ctx, search)
+	if err != nil {
+		return nil, err
 	}
 
 	m := make(map[string]int)
@@ -75,6 +84,21 @@ func (s *Service) ProcessQuery(search string) (map[string]int, error) {
 			return m, ctx.Err()
 		}
 	}
+}
+
+func (s *Service) YandexItems(search string) ([]string, error) {
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(s.timeout))
+	defer cancel()
+	data, err := s.fetchYandex(ctx, search)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(data))
+	for _, v := range data {
+		out = append(out, v.Host)
+	}
+	sort.Strings(out)
+	return out, nil
 }
 
 func (s *Service) CacheUpdate(host string, count int) {

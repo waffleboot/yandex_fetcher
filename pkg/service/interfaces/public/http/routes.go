@@ -26,6 +26,7 @@ func NewEndpoint(s *app.Service) *Endpoint {
 
 func (e *Endpoint) AddRoutes(router *chi.Mux) {
 	router.Get("/sites", e.sites)
+	router.Get("/yandex", e.yandex)
 	router.Post("/update", e.update)
 }
 
@@ -37,6 +38,28 @@ func (e *Endpoint) sites(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m, err := e.service.ProcessQuery(search)
+	if errors.Is(err, context.DeadlineExceeded) {
+		w.WriteHeader(http.StatusRequestTimeout)
+		render.JSON(w, r, m)
+		return
+	}
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	render.JSON(w, r, m)
+}
+
+func (e *Endpoint) yandex(w http.ResponseWriter, r *http.Request) {
+	search := r.URL.Query().Get("search")
+	if search == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("search query param is absent"))
+		return
+	}
+	m, err := e.service.YandexItems(search)
 	if errors.Is(err, context.DeadlineExceeded) {
 		w.WriteHeader(http.StatusRequestTimeout)
 		render.JSON(w, r, m)
