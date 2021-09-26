@@ -23,7 +23,7 @@ type Service struct {
 	clients        []http.Client
 	initialService initialService
 	cache          cache
-	token          chan bool
+	token          sync.RWMutex
 }
 
 func NewService(cache cache, initialService initialService, n int, timeout time.Duration) *Service {
@@ -41,7 +41,6 @@ func NewService(cache cache, initialService initialService, n int, timeout time.
 	return &Service{
 		cache:          cache,
 		clients:        clients,
-		token:          make(chan bool, 1),
 		initialService: initialService}
 }
 
@@ -59,9 +58,9 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	ready := make(chan bool, len(s.clients))
 	start := make(chan bool, len(s.clients))
 
-	s.token <- true
+	s.token.Lock()
 	if n, ok := s.cache.Get(host); ok {
-		<-s.token
+		s.token.Unlock()
 		return n, nil
 	}
 	for i := 0; i < len(s.clients); i++ {
@@ -97,7 +96,7 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	wg.Wait()
 	n := len(s.clients) - int(errCount)
 	s.cache.Put(host, n)
-	<-s.token
+	s.token.Unlock()
 
 	s.initialService.CacheUpdate(host, n)
 
