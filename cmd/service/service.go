@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -71,21 +70,18 @@ func startServer(serviceAddr, checkerUrl string) error {
 	service.AddRoutes(r)
 
 	server := &http.Server{Addr: serviceAddr, Handler: r}
+
+	signalChannel := make(chan os.Signal, 2)
+	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-signalChannel
+		server.Close()
+	}()
+
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
 	return nil
-}
-
-func signalContext() context.Context {
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		defer cancel()
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-		<-c
-	}()
-	return ctx
 }
 
 func intConfig(name string, def int) int {

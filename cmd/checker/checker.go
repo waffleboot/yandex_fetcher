@@ -5,7 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -59,6 +61,13 @@ func startServer(checkerAddr, serviceUrl string) error {
 	r.Mount("/debug", middleware.Profiler())
 
 	server := &http.Server{Addr: checkerAddr, Handler: r}
+
+	signalChannel := make(chan os.Signal, 2)
+	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-signalChannel
+		server.Close()
+	}()
 
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return err
