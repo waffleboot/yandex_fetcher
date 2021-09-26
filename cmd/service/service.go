@@ -15,13 +15,13 @@ import (
 
 	cache "github.com/waffleboot/yandex_fetcher/pkg/cache"
 
-	yandex_application "github.com/waffleboot/yandex_fetcher/pkg/yandex/application"
-	yandex_infra_yandex "github.com/waffleboot/yandex_fetcher/pkg/yandex/infra/yandex"
-	yandex_inter_private_ipc "github.com/waffleboot/yandex_fetcher/pkg/yandex/inter/private/ipc"
+	yandex_app "github.com/waffleboot/yandex_fetcher/pkg/yandex/application"
+	yandex_yandex "github.com/waffleboot/yandex_fetcher/pkg/yandex/infra/yandex"
+	yandex_ipc "github.com/waffleboot/yandex_fetcher/pkg/yandex/inter/private/ipc"
 
-	root_application "github.com/waffleboot/yandex_fetcher/pkg/service/application"
-	root_infra_worker "github.com/waffleboot/yandex_fetcher/pkg/service/infra/checker/http"
-	root_inter_public_http "github.com/waffleboot/yandex_fetcher/pkg/service/inter/public/http"
+	service_app "github.com/waffleboot/yandex_fetcher/pkg/service/application"
+	service_checker "github.com/waffleboot/yandex_fetcher/pkg/service/infra/checker/http"
+	service_http "github.com/waffleboot/yandex_fetcher/pkg/service/inter/public/http"
 )
 
 func run(args []string) int {
@@ -63,15 +63,15 @@ func startServer(serviceAddr, checkerUrl, redisAddr string) error {
 
 	timeout := time.Duration(intConfig("TIMEOUT", 3)) * time.Second
 
-	yandex := yandex_inter_private_ipc.NewEndpoint(
-		yandex_application.NewService(
-			yandex_infra_yandex.NewHttpClient, intConfig("YANDEX_FETCHERS", 1)))
+	yandex := yandex_ipc.NewEndpoint(
+		yandex_app.NewService(
+			yandex_yandex.NewHttpClient, intConfig("YANDEX_FETCHERS", 1)))
 
-	service := root_inter_public_http.NewEndpoint(
-		root_application.NewService(
+	service := service_http.NewEndpoint(
+		service_app.NewService(
 			timeout,
 			yandex.AddQuery,
-			root_infra_worker.NewBenchmarkSupplier(checkerUrl),
+			service_checker.NewBenchmarkSupplier(checkerUrl),
 			cach))
 
 	service.AddRoutes(r)
