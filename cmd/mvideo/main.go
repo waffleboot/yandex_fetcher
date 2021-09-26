@@ -41,17 +41,6 @@ func run(url string) error {
 	if err != nil {
 		return err
 	}
-	// req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	// req.Header.Set("Accept-Encoding", "gzip, deflate, br")
-	// req.Header.Set("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3")
-	// req.Header.Set("Connection", "keep-alive")
-	// req.Header.Set("DNT", "1")
-	// req.Header.Set("Host", "www.mvideo.ru")
-	// req.Header.Set("Sec-Fetch-Dest", "document")
-	// req.Header.Set("Sec-Fetch-Mode", "navigate")
-	// req.Header.Set("Sec-Fetch-Site", "none")
-	// req.Header.Set("Sec-Fetch-User", "?1")
-	// req.Header.Set("Upgrade-Insecure-Requests", "1")
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:92.0) Gecko/20100101 Firefox/92.0")
 	resp, err := client.Do(req)
 	if err != nil {
