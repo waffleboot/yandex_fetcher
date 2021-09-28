@@ -16,7 +16,7 @@ func main() {
 	var c fasthttp.Client
 	c.MaxConnsPerHost = N
 	ready := make(chan bool, N)
-	start := make(chan bool, N)
+	start := make(chan bool)
 	for i := 0; i < N; i++ {
 		go func() {
 			defer wg.Done()
@@ -42,8 +42,6 @@ func main() {
 	for i := 0; i < N; i++ {
 		<-ready
 	}
-	for i := 0; i < N; i++ {
-		start <- true
-	}
+	close(start)
 	wg.Wait()
 }
