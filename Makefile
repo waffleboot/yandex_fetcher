@@ -24,6 +24,7 @@ test:
 	@curl http://localhost:9000/sites?search=купить+playstation  | jq .
 
 tex-soyuz.ru:
-	go run ./cmd/tex-soyuz.ru
+	# go run ./cmd/tex-soyuz.ru
+	go test --bench=. --benchtime 1000x ./cmd/tex-soyuz.ru
 
 FORCE: ;
