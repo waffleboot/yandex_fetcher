@@ -25,10 +25,10 @@ func main() {
 			req.SetRequestURI("https://tex-soyuz.ru/")
 			c.Dial = func(addr string) (conn net.Conn, err error) {
 				conn, err = fasthttp.Dial(addr)
+				ready <- true
 				if err != nil {
 					log.Println(err)
 				}
-				ready <- true
 				<-start
 				return
 			}
