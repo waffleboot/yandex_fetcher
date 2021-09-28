@@ -23,4 +23,7 @@ test:
 	@curl http://localhost:9000/yandex?search=купить+playstation  | jq .
 	@curl http://localhost:9000/sites?search=купить+playstation  | jq .
 
+tex-soyuz.ru:
+	go run ./cmd/tex-soyuz.ru
+
 FORCE: ;
