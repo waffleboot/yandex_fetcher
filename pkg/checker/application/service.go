@@ -54,7 +54,7 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	wg.Add(len(s.clients))
 
 	ready := make(chan bool, len(s.clients))
-	start := make(chan bool, len(s.clients))
+	start := make(chan bool)
 
 	s.token.Lock()
 	if n, ok := s.cache.Get(host); ok {
@@ -92,9 +92,7 @@ func (s *Service) Benchmark(host, url string) (int, error) {
 	for i := 0; i < len(s.clients); i++ {
 		<-ready
 	}
-	for i := 0; i < len(s.clients); i++ {
-		start <- true
-	}
+	close(start)
 	wg.Wait()
 	n := len(s.clients) - int(atomic.LoadUint32(&errCount))
 	s.cache.Put(host, n)
