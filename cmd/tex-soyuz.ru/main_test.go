@@ -40,7 +40,7 @@ func BenchmarkChannel(b *testing.B) {
 	var wg sync.WaitGroup
 	wg.Add(b.N)
 
-	ready := make(chan bool, b.N)
+	ready := make(chan bool)
 	start := make(chan bool)
 
 	for i := 0; i < b.N; i++ {
@@ -64,7 +64,7 @@ func BenchmarkLock(b *testing.B) {
 	var wg sync.WaitGroup
 	wg.Add(b.N)
 
-	ready := make(chan bool, b.N)
+	ready := make(chan bool)
 
 	var l sync.RWMutex
 	l.Lock()
