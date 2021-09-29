@@ -10,15 +10,17 @@ func BenchmarkCond(b *testing.B) {
 	var wg sync.WaitGroup
 	wg.Add(b.N)
 
-	ready := make(chan bool, b.N)
-
-	v := sync.NewCond(&sync.RWMutex{})
+	var start bool
+	ready := make(chan bool)
+	v := sync.NewCond(&sync.Mutex{})
 
 	for i := 0; i < b.N; i++ {
 		go func() {
 			ready <- true
 			v.L.Lock()
-			v.Wait()
+			if !start {
+				v.Wait()
+			}
 			v.L.Unlock()
 			// op
 			wg.Done()
@@ -27,6 +29,7 @@ func BenchmarkCond(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		<-ready
 	}
+	start = true
 	b.ResetTimer()
 	v.Broadcast()
 	wg.Wait()
