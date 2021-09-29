@@ -70,7 +70,6 @@ func BenchmarkLock(b *testing.B) {
 		go func() {
 			ready <- true
 			l.RLock()
-			l.RUnlock()
 			// op
 			wg.Done()
 		}()
